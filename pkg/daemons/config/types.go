@@ -30,6 +30,7 @@ type Node struct {
 	NoFlannel                bool
 	SELinux                  bool
 	FlannelBackend           string
+	FlannelBackendPort       int
 	FlannelConf              string
 	FlannelConfOverride      bool
 	FlannelIface             *net.Interface
@@ -135,6 +136,8 @@ type Control struct {
 	NoLeaderElect            bool
 	JoinURL                  string
 	FlannelBackend           string
+	// The Port which flannel backend runs on
+	FlannelBackendPort       int
 	IPSECPSK                 string
 	DefaultLocalStoragePath  string
 	SystemDefaultRegistry    string

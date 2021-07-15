@@ -418,6 +418,7 @@ func get(ctx context.Context, envInfo *cmds.Agent, proxy proxy.Proxy) (*config.N
 		SELinux:                  envInfo.EnableSELinux,
 		ContainerRuntimeEndpoint: envInfo.ContainerRuntimeEndpoint,
 		FlannelBackend:           controlConfig.FlannelBackend,
+		FlannelBackendPort:       controlConfig.FlannelBackendPort,
 		ServerHTTPSPort:          controlConfig.HTTPSPort,
 	}
 	nodeConfig.FlannelIface = flannelIface

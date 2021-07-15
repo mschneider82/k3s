@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -62,9 +63,9 @@ const (
 	wireguardBackend = `{
 	"Type": "extension",
 	"PreStartupCommand": "wg genkey | tee %flannelConfDir%/privatekey | wg pubkey",
-	"PostStartupCommand": "export SUBNET_IP=$(echo $SUBNET | cut -d'/' -f 1); ip link del flannel.1 2>/dev/null; echo $PATH >&2; wg-add.sh flannel.1 && wg set flannel.1 listen-port 51820 private-key %flannelConfDir%/privatekey && ip addr add $SUBNET_IP/32 dev flannel.1 && ip link set flannel.1 up && ip route add $NETWORK dev flannel.1",
+	"PostStartupCommand": "export SUBNET_IP=$(echo $SUBNET | cut -d'/' -f 1); ip link del flannel.1 2>/dev/null; echo $PATH >&2; wg-add.sh flannel.1 && wg set flannel.1 listen-port %flannelBackendPort% private-key %flannelConfDir%/privatekey && ip addr add $SUBNET_IP/32 dev flannel.1 && ip link set flannel.1 up && ip route add $NETWORK dev flannel.1",
 	"ShutdownCommand": "ip link del flannel.1",
-	"SubnetAddCommand": "read PUBLICKEY; wg set flannel.1 peer $PUBLICKEY endpoint $PUBLIC_IP:51820 allowed-ips $SUBNET persistent-keepalive 25",
+	"SubnetAddCommand": "read PUBLICKEY; wg set flannel.1 peer $PUBLICKEY endpoint $PUBLIC_IP:%flannelBackendPort% allowed-ips $SUBNET persistent-keepalive 25",
 	"SubnetRemoveCommand": "read PUBLICKEY; wg set flannel.1 peer $PUBLICKEY remove"
 }`
 )
@@ -134,6 +135,12 @@ func createFlannelConf(nodeConfig *config.Node) error {
 		}
 	case config.FlannelBackendWireguard:
 		backendConf = strings.ReplaceAll(wireguardBackend, "%flannelConfDir%", filepath.Dir(nodeConfig.FlannelConf))
+		flannelBackendPort := 51820 // default for wireguard
+		if nodeConfig.FlannelBackendPort != 0 {
+			flannelBackendPort = nodeConfig.FlannelBackendPort
+		}
+
+		backendConf = strings.ReplaceAll(backendConf, "%flannelBackendPort%", strconv.Itoa(flannelBackendPort))
 	default:
 		return fmt.Errorf("Cannot configure unknown flannel backend '%s'", nodeConfig.FlannelBackend)
 	}

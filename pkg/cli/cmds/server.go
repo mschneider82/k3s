@@ -50,6 +50,8 @@ type Server struct {
 	DisableScheduler         bool
 	ServerURL                string
 	FlannelBackend           string
+	// The port which flannel-backend runs on
+	FlannelBackendPort       int
 	DefaultLocalStoragePath  string
 	DisableCCM               bool
 	DisableNPC               bool
@@ -182,6 +184,11 @@ func NewServerCommand(action func(*cli.Context) error) cli.Command {
 				Usage:       "(networking) One of 'none', 'vxlan', 'ipsec', 'host-gw', or 'wireguard'",
 				Destination: &ServerConfig.FlannelBackend,
 				Value:       "vxlan",
+			},
+			cli.IntFlag{
+				Name:        "flannel-backend-port",
+				Usage:       "(networking) Port that the flannel-backend should use (default depends on backend)",
+				Destination: &ServerConfig.FlannelBackendPort,
 			},
 			cli.StringFlag{
 				Name:        "token,t",
